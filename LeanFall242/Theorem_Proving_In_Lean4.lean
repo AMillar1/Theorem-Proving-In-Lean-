@@ -119,6 +119,7 @@ example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
   have hqr : q ∨ r := Or.inl hq
   show p ∨ (q ∨ r) from Or.inr hqr)))
   (fun h: p ∨ (q ∨ r) =>
+  -- Verify brach depth
 
   )
 
