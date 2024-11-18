@@ -116,15 +116,57 @@ example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
   (fun hp : p =>
   show p ∨ (q ∨ r) from Or.inl hp)
   (fun hq : q =>
-  have hqr : q ∨ r := Or.inl hq
-  show p ∨ (q ∨ r) from Or.inr hqr)))
+  have hr : q ∨ r := Or.inl hq
+  show p ∨ (q ∨ r) from Or.inr hr)))
+  -- Now Prove L <- R
   (fun h: p ∨ (q ∨ r) =>
-  -- Verify brach depth
-
+  Or.elim h
+  (fun hp : p =>
+  have hpq : p ∨ q := Or.inl hp
+  show (p ∨ q) ∨ r from Or.inl hpq)
+  (fun hqr : q ∨ r =>
+  Or.elim hqr
+  (fun hq : q =>
+  have hpq : p ∨ q := Or.inr hq
+  show (p ∨ q) ∨ r from Or.inl hpq)
+  (fun hr : r =>
+  show (p ∨ q) ∨ r from Or.inr hr
+  )
+  )
   )
 
 -- distributivity
-example : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) := sorry
+example : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :=
+-- First prove L -> R
+Iff.intro
+(fun hpqr : p ∧ (q ∨ r) =>
+have hp : p := hpqr.left
+have hqr : q ∨ r := hpqr.right
+Or.elim hqr
+(fun hq : q =>
+have hpq : p ∧ q := ⟨hp,hq⟩
+show (p ∧ q) ∨ (p ∧ r) from Or.inl hpq)
+(fun hr : r =>
+have hpr : p ∧ r := ⟨hp,hr⟩
+show (p ∧ q) ∨ (p ∧ r) from Or.inr hpr)
+)
+-- Now prove L <- R
+(fun hpqr : (p ∧ q) ∨ (p ∧ r) =>
+Or.elim hpqr
+(fun hpq : p ∧ q =>
+have hp : p := hpq.left
+have hq : q := hpq.right
+have hqr : q ∨ r := Or.inl hq
+show p ∧ (q ∨ r) from ⟨hp,hqr⟩)
+(fun hpr : p ∧ r =>
+have hp : p := hpr.left
+have hr : r := hpr.right
+have hqr : q ∨ r := Or.inr hr
+show p ∧ (q ∨ r) from ⟨hp,hqr⟩
+)
+)
+
+
 example : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
 
 -- other properties
