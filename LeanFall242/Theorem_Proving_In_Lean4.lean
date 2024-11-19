@@ -74,103 +74,144 @@ example : p ∧ q ↔ q ∧ p :=
 example : p ∨ q ↔ q ∨ p :=
   Iff.intro
     (fun h : p ∨ q =>
-    Or.elim h
-    (fun hp : p =>
-    show q ∨ p from Or.inr hp)
-    (fun hq : q =>
-    show q ∨ p from Or.inl hq)
-    )
+      Or.elim h
+      (fun hp : p =>
+        show q ∨ p from Or.inr hp)
+      (fun hq : q =>
+        show q ∨ p from Or.inl hq))
     (fun h : q ∨ p =>
-    Or.elim h
-    (fun hq : q =>
-    show p ∨ q from Or.inr hq)
-    (fun hp : p =>
-    show p ∨ q from Or.inl hp)
+      Or.elim h
+      (fun hq : q =>
+        show p ∨ q from Or.inr hq)
+      (fun hp : p =>
+        show p ∨ q from Or.inl hp)
     )
 
 
 -- associativity of ∧ and ∨
 example : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) :=
   Iff.intro
-  (fun h : (p ∧ q) ∧ r =>
-  have hr : r := h.right
-  have hpq : p ∧ q := h.left
-  have hp : p := hpq.left
-  have hq : q := hpq.right
-  show p ∧ (q ∧ r) from ⟨hp,⟨hq, hr⟩⟩
-  )
-  (fun h : p ∧ q ∧ r =>
-  have hp : p := h.left
-  have hqr : q ∧ r := h.right
-  have hq : q := hqr.left
-  have hr : r := hqr.right
-  show (p ∧ q) ∧ r from ⟨⟨hp,hq⟩,hr⟩
-  )
+    (fun h : (p ∧ q) ∧ r =>
+      have hr : r := h.right
+      have hpq : p ∧ q := h.left
+      have hp : p := hpq.left
+      have hq : q := hpq.right
+      show p ∧ (q ∧ r) from ⟨hp,⟨hq, hr⟩⟩)
+    (fun h : p ∧ q ∧ r =>
+      have hp : p := h.left
+      have hqr : q ∧ r := h.right
+      have hq : q := hqr.left
+      have hr : r := hqr.right
+      show (p ∧ q) ∧ r from ⟨⟨hp,hq⟩,hr⟩
+    )
 
 example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
   Iff.intro
-  (fun h: (p ∨ q) ∨ r =>
-  Or.elim h
-  (fun hpq : p ∨ q =>
-  Or.elim hpq
-  (fun hp : p =>
-  show p ∨ (q ∨ r) from Or.inl hp)
-  (fun hq : q =>
-  have hr : q ∨ r := Or.inl hq
-  show p ∨ (q ∨ r) from Or.inr hr)))
+    (fun hpqr : (p ∨ q) ∨ r =>
+      Or.elim hpqr
+      (fun hpq : p ∨ q =>
+        Or.elim hpq
+        (fun hp : p =>
+          show p ∨ (q ∨ r) from Or.inl hp)
+        (fun hq : q =>
+          have hr : q ∨ r := Or.inl hq
+          show p ∨ (q ∨ r) from Or.inr hr))
+      (fun hr : r =>
+        show p ∨ (q ∨ r) from Or.inr(Or.inr hr)
+      )
+    )
   -- Now Prove L <- R
-  (fun h: p ∨ (q ∨ r) =>
-  Or.elim h
-  (fun hp : p =>
-  have hpq : p ∨ q := Or.inl hp
-  show (p ∨ q) ∨ r from Or.inl hpq)
-  (fun hqr : q ∨ r =>
-  Or.elim hqr
-  (fun hq : q =>
-  have hpq : p ∨ q := Or.inr hq
-  show (p ∨ q) ∨ r from Or.inl hpq)
-  (fun hr : r =>
-  show (p ∨ q) ∨ r from Or.inr hr
-  )
-  )
-  )
+    (fun h: p ∨ (q ∨ r) =>
+      Or.elim h
+      (fun hp : p =>
+        have hpq : p ∨ q := Or.inl hp
+        show (p ∨ q) ∨ r from Or.inl hpq)
+      (fun hqr : q ∨ r =>
+        Or.elim hqr
+        (fun hq : q =>
+          have hpq : p ∨ q := Or.inr hq
+          show (p ∨ q) ∨ r from Or.inl hpq)
+        (fun hr : r =>
+          show (p ∨ q) ∨ r from Or.inr hr)
+      )
+    )
 
 -- distributivity
 example : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :=
 -- First prove L -> R
-Iff.intro
-(fun hpqr : p ∧ (q ∨ r) =>
-have hp : p := hpqr.left
-have hqr : q ∨ r := hpqr.right
-Or.elim hqr
-(fun hq : q =>
-have hpq : p ∧ q := ⟨hp,hq⟩
-show (p ∧ q) ∨ (p ∧ r) from Or.inl hpq)
-(fun hr : r =>
-have hpr : p ∧ r := ⟨hp,hr⟩
-show (p ∧ q) ∨ (p ∧ r) from Or.inr hpr)
-)
+  Iff.intro
+    (fun hpqr : p ∧ (q ∨ r) =>
+      have hp : p := hpqr.left
+      have hqr : q ∨ r := hpqr.right
+        Or.elim hqr
+        (fun hq : q =>
+          have hpq : p ∧ q := ⟨hp,hq⟩
+          show (p ∧ q) ∨ (p ∧ r) from Or.inl hpq)
+        (fun hr : r =>
+          have hpr : p ∧ r := ⟨hp,hr⟩
+          show (p ∧ q) ∨ (p ∧ r) from Or.inr hpr)
 -- Now prove L <- R
-(fun hpqr : (p ∧ q) ∨ (p ∧ r) =>
-Or.elim hpqr
-(fun hpq : p ∧ q =>
-have hp : p := hpq.left
-have hq : q := hpq.right
-have hqr : q ∨ r := Or.inl hq
-show p ∧ (q ∨ r) from ⟨hp,hqr⟩)
-(fun hpr : p ∧ r =>
-have hp : p := hpr.left
-have hr : r := hpr.right
-have hqr : q ∨ r := Or.inr hr
-show p ∧ (q ∨ r) from ⟨hp,hqr⟩
-)
-)
+    (fun hpqr : (p ∧ q) ∨ (p ∧ r) =>
+      Or.elim hpqr
+      (fun hpq : p ∧ q =>
+        have hp : p := hpq.left
+        have hq : q := hpq.right
+        have hqr : q ∨ r := Or.inl hq
+        show p ∧ (q ∨ r) from ⟨hp,hqr⟩)
+      (fun hpr : p ∧ r =>
+        have hp : p := hpr.left
+        have hr : r := hpr.right
+        have hqr : q ∨ r := Or.inr hr
+        show p ∧ (q ∨ r) from ⟨hp,hqr⟩)
+    ))
 
 
-example : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
+example : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) :=
+Iff.intro
+  (fun hpqr : p ∨ (q ∧ r) =>
+    Or.elim hpqr
+    (fun hp : p =>
+      have hpq : p ∨ q := Or.inl hp
+      have hpr : p ∨ r := Or.inl hp
+      show (p ∨ q) ∧ (p ∨ r) from ⟨hpq, hpr⟩)
+    (fun hqr : q ∧ r =>
+      have hq : q := hqr.left
+      have hr : r := hqr.right
+      have hpq : p ∨ q := Or.inr hq
+      have hpr : p ∨ r := Or.inr hr
+      show (p ∨ q) ∧ (p ∨ r) from ⟨hpq,hpr⟩))
+  (fun hpqpr : (p ∨ q) ∧ (p ∨ r) =>
+    have hpq : p ∨ q := hpqpr.left
+    have hpr : p ∨ r := hpqpr.right
+    Or.elim hpq
+      (fun hp : p =>
+        show p ∨ (q ∧ r) from Or.inl hp)
+      (fun hq : q =>
+        Or.elim hpr
+          (fun hp : p =>
+            show p ∨ (q ∧ r) from Or.inl hp)
+          (fun hr : r =>
+            show p ∨ (q ∧ r) from Or.inr (⟨hq,hr⟩))
+      )
+    )
+
+
 
 -- other properties
-example : (p → (q → r)) ↔ (p ∧ q → r) := sorry
+example : (p → (q → r)) ↔ (p ∧ q → r) :=
+Iff.intro
+  (fun hpqr : (p → (q → r)) =>
+    (fun hpq : p ∧ q =>
+      have hp : p := hpq.left
+      have hq : q := hpq.right
+      have hqr : q → r := hpqr hp
+      show r from hqr hq))
+  (fun hpqr : (p ∧ q → r) =>
+    (fun hp : p =>
+      (fun hq : q =>
+        have hpq : p ∧ q := ⟨hp,hq⟩
+        show r from hpqr hpq)))
+
 example : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) := sorry
 example : ¬(p ∨ q) ↔ ¬p ∧ ¬q := sorry
 example : ¬p ∨ ¬q → ¬(p ∧ q) := sorry
