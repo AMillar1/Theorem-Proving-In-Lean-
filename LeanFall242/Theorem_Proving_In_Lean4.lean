@@ -212,9 +212,62 @@ Iff.intro
         have hpq : p ∧ q := ⟨hp,hq⟩
         show r from hpqr hpq)))
 
-example : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) := sorry
-example : ¬(p ∨ q) ↔ ¬p ∧ ¬q := sorry
-example : ¬p ∨ ¬q → ¬(p ∧ q) := sorry
+example : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) :=
+Iff.intro
+  (fun hpqr : ((p ∨ q) → r) =>
+    ⟨
+      (fun hp : p =>
+        have hpq : p ∨ q := Or.inl hp
+        show r from hpqr hpq),
+      (fun hq : q =>
+        have hpq : p ∨ q := Or.inr hq
+        show r from hpqr hpq)
+    ⟩)
+  (fun hpqrr : (p → r) ∧ (q → r) =>
+    (fun hpq : p ∨ q =>
+      Or.elim hpq
+        (fun hp : p =>
+          have hpr : p → r := hpqrr.left
+          show r from hpr hp)
+        (fun hq : q =>
+          have hqr : q → r := hpqrr.right
+          show r from hqr hq)))
+
+
+example : ¬(p ∨ q) ↔ ¬p ∧ ¬q :=
+Iff.intro
+  (fun hpq : ¬(p ∨ q) =>
+    ⟨
+      (fun hp : p =>
+        have hq : p ∨ q := Or.inl hp
+        show False from hpq hq),
+      (fun hq : q =>
+        have hp : p ∨ q := Or.inl hp
+        show False from hpq hp)
+    ⟩
+  )
+  (fun hpq : ¬p ∧ ¬q =>
+    (fun hn : p ∨ q =>
+      Or.elim hn
+        (fun hp : p =>
+          show False from hpq.left hp)
+        (fun hq : q =>
+          show False from hpq.right hq)
+    )
+  )
+
+example : ¬p ∨ ¬q → ¬(p ∧ q) :=
+(fun hd : ¬p ∨ ¬q =>
+  Or.elim hd
+    (fun hp : ¬p =>
+      (fun hpq : p ∧ q =>
+        show False from hp hpq.left)
+    )
+    (fun hq : ¬ q =>
+      (fun hpq : p ∧ q =>
+        show False from hq hpq.right))
+)
+
 example : ¬(p ∧ ¬p) := sorry
 example : p ∧ ¬q → ¬(p → q) := sorry
 example : ¬p → (p → q) := sorry
