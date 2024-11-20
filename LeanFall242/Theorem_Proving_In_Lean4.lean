@@ -268,10 +268,61 @@ example : ¬p ∨ ¬q → ¬(p ∧ q) :=
         show False from hq hpq.right))
 )
 
-example : ¬(p ∧ ¬p) := sorry
-example : p ∧ ¬q → ¬(p → q) := sorry
-example : ¬p → (p → q) := sorry
-example : (¬p ∨ q) → (p → q) := sorry
-example : p ∨ False ↔ p := sorry
-example : p ∧ False ↔ False := sorry
-example : (p → q) → (¬q → ¬p) := sorry
+example : ¬(p ∧ ¬p) :=
+(fun hp : p ∧ ¬p =>
+  show False from hp.right hp.left)
+
+example : p ∧ ¬q → ¬(p → q) :=
+(fun hpq : p ∧ ¬q =>
+  (fun hi : p → q =>
+    show False from hpq.right (hi hpq.left))
+)
+
+example : ¬p → (p → q) :=
+(fun hn : ¬p =>
+  (fun hp : p =>
+    False.elim (hn hp)))
+
+example : (¬p ∨ q) → (p → q) :=
+(fun hd : ¬p ∨ q =>
+  Or.elim hd
+    (fun hnp: ¬p =>
+      (fun hp : p =>
+        False.elim (hnp hp))
+    )
+    (fun hq : q =>
+      (fun hp : p =>
+         hq))
+)
+
+
+example : p ∨ False ↔ p :=
+Iff.intro
+  (fun hd : p ∨ False =>
+    Or.elim hd
+      (fun hp : p =>
+        hp
+      )
+      (fun hf : False =>
+        False.elim hf)
+  )
+  (fun hp : p =>
+    show p ∨ False from Or.inl hp)
+
+example : p ∧ False ↔ False :=
+Iff.intro
+  (fun hc : p ∧ False =>
+    hc.right
+  )
+  (fun hf : False =>
+    False.elim hf
+  )
+
+
+example : (p → q) → (¬q → ¬p) :=
+(fun hl : p → q =>
+  (fun hq : ¬q =>
+    (fun hp : p =>
+      hq (hl hp))
+  )
+)
