@@ -326,3 +326,56 @@ example : (p → q) → (¬q → ¬p) :=
       hq (hl hp))
   )
 )
+open Classical
+
+variable (p q r : Prop)
+
+example : (p → q ∨ r) → ((p → q) ∨ (p → r)) :=
+(fun hl : p → q ∨ r =>
+  Or.elim (Classical.em p)
+    (fun hp : p =>
+      have hqr : q ∨ r := hl hp
+        Or.elim hqr
+          (fun hq : q =>
+            Or.inl ((fun hp : p =>
+              hq)))
+          (fun hr : r =>
+            Or.inr( (fun hp : p =>
+              hr)))
+        )
+    (fun hn : ¬p =>
+      (fun hp : p =>
+        False.elim hp)
+    )
+)
+
+
+
+example : ¬(p ∧ q) → ¬p ∨ ¬q :=
+(fun hn : ¬(p ∧ q) =>
+  Or.elim (Classical.em p)
+    (fun hp : p =>
+      Or.elim (Classical.em q)
+        (fun hq : q =>
+          have hc : p ∧ q := ⟨hp,hq ⟩
+          False.elim (hn hc))
+        (fun hnq : ¬q =>
+          (fun hp : p => hq)
+        )
+    )
+    (fun hnp : ¬p =>
+      show ¬p ∨ ¬q from Or.inl hnp)
+)
+
+example : ¬(p → q) → p ∧ ¬q :=
+    (fun hn : ¬(p → q) =>
+      Or.elim (Classical.em q)
+        (fun hq : q =>
+          have hi : p → q := q
+          )
+    )
+
+example : (p → q) → (¬p ∨ q) := sorry
+example : (¬q → ¬p) → (p → q) := sorry
+example : p ∨ ¬p := sorry
+example : (((p → q) → p) → p) := sorry
