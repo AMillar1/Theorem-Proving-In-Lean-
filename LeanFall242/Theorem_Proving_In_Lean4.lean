@@ -117,7 +117,7 @@ example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
           have hr : q ∨ r := Or.inl hq
           show p ∨ (q ∨ r) from Or.inr hr))
       (fun hr : r =>
-        show p ∨ (q ∨ r) from Or.inr(Or.inr hr)
+        show p ∨ (q ∨ r) from Or.inr (Or.inr hr)
       )
     )
   -- Now Prove L <- R
@@ -143,13 +143,13 @@ example : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :=
     (fun hpqr : p ∧ (q ∨ r) =>
       have hp : p := hpqr.left
       have hqr : q ∨ r := hpqr.right
-        Or.elim hqr
+      Or.elim hqr
         (fun hq : q =>
           have hpq : p ∧ q := ⟨hp,hq⟩
           show (p ∧ q) ∨ (p ∧ r) from Or.inl hpq)
         (fun hr : r =>
           have hpr : p ∧ r := ⟨hp,hr⟩
-          show (p ∧ q) ∨ (p ∧ r) from Or.inr hpr)
+          show (p ∧ q) ∨ (p ∧ r) from Or.inr hpr))
 -- Now prove L <- R
     (fun hpqr : (p ∧ q) ∨ (p ∧ r) =>
       Or.elim hpqr
@@ -163,7 +163,41 @@ example : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :=
         have hr : r := hpr.right
         have hqr : q ∨ r := Or.inr hr
         show p ∧ (q ∨ r) from ⟨hp,hqr⟩)
-    ))
+    )
+
+
+example : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :=
+  Iff.intro
+    -- Prove L → R
+    (fun hpqr : p ∧ (q ∨ r) =>
+      have hp : p := hpqr.left
+      have hqr : q ∨ r := hpqr.right
+      Or.elim hqr
+        (fun hq : q =>
+          have hpq : p ∧ q := ⟨hp, hq⟩
+          show (p ∧ q) ∨ (p ∧ r) from Or.inl hpq)
+        (fun hr : r =>
+          have hpr : p ∧ r := ⟨hp, hr⟩
+          show (p ∧ q) ∨ (p ∧ r) from Or.inr hpr))
+    -- Prove L ← R
+    (fun hpqr : (p ∧ q) ∨ (p ∧ r) =>
+      Or.elim hpqr
+        (fun hpq : p ∧ q =>
+          have hp : p := hpq.left
+          have hq : q := hpq.right
+          have hqr : q ∨ r := Or.inl hq
+          show p ∧ (q ∨ r) from ⟨hp, hqr⟩)
+        (fun hpr : p ∧ r =>
+          have hp : p := hpr.left
+          have hr : r := hpr.right
+          have hqr : q ∨ r := Or.inr hr
+          show p ∧ (q ∨ r) from ⟨hp, hqr⟩))
+
+
+
+
+
+
 
 
 example : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) :=
@@ -242,7 +276,7 @@ Iff.intro
         have hq : p ∨ q := Or.inl hp
         show False from hpq hq),
       (fun hq : q =>
-        have hp : p ∨ q := Or.inl hp
+        have hp : p ∨ q := Or.inr hq
         show False from hpq hp)
     ⟩
   )
@@ -360,7 +394,7 @@ example : ¬(p ∧ q) → ¬p ∨ ¬q :=
           have hc : p ∧ q := ⟨hp,hq ⟩
           False.elim (hn hc))
         (fun hnq : ¬q =>
-          (fun hp : p => hq)
+          Or.inr hnq
         )
     )
     (fun hnp : ¬p =>
@@ -371,11 +405,47 @@ example : ¬(p → q) → p ∧ ¬q :=
     (fun hn : ¬(p → q) =>
       Or.elim (Classical.em q)
         (fun hq : q =>
-          have hi : p → q := q
+          False.elim (hn (fun hi : p => hq))
           )
+        (fun hnq : ¬q =>
+          ⟨
+            byContradiction
+              (fun np : ¬p =>
+                have hnpq : ¬p ∨ q := Or.inl np
+                have hpq : p → q :=
+                Or.elim hnpq
+                  (fun hnp: ¬p => )
+              ),
+
+            hnq⟩
+
+        )
     )
 
-example : (p → q) → (¬p ∨ q) := sorry
+
+
+
+example : (p → q) → (¬p ∨ q) :=
+  (fun hi : p → q =>
+    Or.elim (Classical.em p)
+      (fun hp : p =>
+        show ¬p ∨ q from Or.inr (hi hp)
+      )
+      (fun hn : ¬p =>
+        show ¬p ∨ q from Or.inl hn)
+    )
+
 example : (¬q → ¬p) → (p → q) := sorry
-example : p ∨ ¬p := sorry
+
+
+example : p ∨ ¬p :=
+  Or.elim (Classical.em p)
+    (fun hp : p =>
+    show p ∨ ¬p from Or.inl hp
+    )
+    (fun hn : ¬p =>
+    show p ∨ ¬p from Or.inr hn
+    )
+
+
 example : (((p → q) → p) → p) := sorry
